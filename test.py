@@ -575,7 +575,8 @@ class TestCommandParams(unittest.TestCase):
         'separator': '-',
         'stopwords': None,
         'lowercase': True,
-        'replacements': None
+        'replacements': None,
+        'regex_pattern': None
     }
 
     def get_params_from_cli(self, *argv):
@@ -622,6 +623,12 @@ class TestCommandParams(unittest.TestCase):
             self.get_params_from_cli('--replacements', 'A--B')
         self.assertEqual(err.exception.code, 2)
         self.assertIn("Replacements must be of the form: ORIGINAL->REPLACED", cse.getvalue())
+
+    def test_regex_pattern(self):
+        params = self.get_params_from_cli('--regex-pattern', '[^-a-z0-9_]+', '___This is a test___')
+        expected = self.make_params(text='___This is a test___', regex_pattern='[^-a-z0-9_]+')
+        self.assertParamsMatch(expected, params)
+        self.assertEqual(slugify(**params), '___this-is-a-test___')
 
     def test_text_in_cli(self):
         params = self.get_params_from_cli('Cool Text')
